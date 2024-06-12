@@ -1,7 +1,7 @@
 {
   "name": "@grnsft/if-core",
   "description": "If core utilities.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "Green Software Foundation",
     "email": "info@gsf.com"
@@ -37,7 +37,7 @@
     "impact"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": {
     "url": "git+https://github.com/Green-Software-Foundation/if-core.git"
   },
@@ -51,5 +51,12 @@
     "prepublish": "npm run build",
     "test": "jest --verbose"
   },
-  "types": "index.d.ts"
+  "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "types": [
+        "dist/types.d.ts"
+      ]
+    }
+  }
 }
