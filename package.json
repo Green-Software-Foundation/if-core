@@ -1,5 +1,5 @@
 {
-  "name": "if-core",
+  "name": "@grnsft/if-core",
   "description": "If core utilities.",
   "version": "v0.0.1",
   "author": {
@@ -15,9 +15,8 @@
   "devDependencies": {
     "@babel/core": "7.22.10",
     "@babel/preset-typescript": "^7.22.5",
-    "@jest/globals": "^29.6.1",
-    "@types/jest": "^29.5.7",
-    "@types/luxon": "^3.4.2",
+    "@commitlint/cli": "^18.6.0",
+    "@commitlint/config-conventional": "^18.6.0",
     "@types/node": "^20.4.5",
     "fixpack": "^4.0.0",
     "gts": "^5.0.0",
@@ -30,9 +29,14 @@
     "npm": ">=8"
   },
   "homepage": "https://greensoftware.foundation",
-  "keywords": ["impact", "framework", "carbon", "greensoftware"],
+  "keywords": [
+    "carbon",
+    "framework",
+    "greensoftware",
+    "impact"
+  ],
   "license": "MIT",
-  "main": "build/index.js",
+  "main": "index.js",
   "repository": {
     "url": "https://github.com/Green-Software-Foundation/if-core.git"
   },
@@ -45,5 +49,6 @@
     "prepare": "husky install",
     "prepublish": "npm run build",
     "test": "jest --verbose"
-  }
+  },
+  "types": "index.d.ts"
 }
