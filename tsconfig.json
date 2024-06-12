@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./build",
+    "outDir": "./",
     "declarationMap": false,
     "inlineSourceMap": true,
     "inlineSources": true,
     "alwaysStrict": true,
     "declaration": true,
-    "experimentalDecorators": true,
     "incremental": false,
     "lib": [
       "es2020"
@@ -25,13 +24,11 @@
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "stripInternal": false,
     "target": "ES2020",
     "composite": false
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.csv"
   ],
   "exclude": [
     "node_modules",
