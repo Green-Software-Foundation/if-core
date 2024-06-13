@@ -92,3 +92,19 @@ export type TimeParams = {
   interval: number;
   allowPadding: boolean;
 };
+
+/** Group-by */
+export type GroupByPlugin = {
+  execute: (inputs: PluginParams[], config: GroupByConfig) => {children: any};
+  metadata: {
+    kind: string;
+  };
+  [key: string]: any;
+};
+
+export type GroupByConfig = {
+  group: string[];
+};
+
+/** Common */
+export type ConfigParams = Record<string, any>;
