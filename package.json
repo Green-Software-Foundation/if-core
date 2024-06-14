@@ -1,7 +1,7 @@
 {
   "name": "@grnsft/if-core",
   "description": "If core utilities.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "Green Software Foundation",
     "email": "info@gsf.com"
@@ -29,6 +29,9 @@
     "node": ">=18",
     "npm": ">=8"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "homepage": "https://greensoftware.foundation",
   "keywords": [
     "carbon",
@@ -37,13 +40,13 @@
     "impact"
   ],
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "./index.js",
   "repository": {
     "url": "git+https://github.com/Green-Software-Foundation/if-core.git"
   },
   "scripts": {
     "build": "npm run clean && tsc --project tsconfig.build.json",
-    "clean": "rimraf build/",
+    "clean": "rimraf dist/",
     "fix": "gts fix",
     "fix:package": "fixpack",
     "lint": "gts lint",
@@ -51,12 +54,5 @@
     "prepublish": "npm run build",
     "test": "jest --verbose"
   },
-  "types": "dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "types": [
-        "dist/types.d.ts"
-      ]
-    }
-  }
+  "types": "./types.d.ts"
 }
