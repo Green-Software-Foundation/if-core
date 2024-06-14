@@ -1,7 +1,7 @@
 {
   "name": "@grnsft/if-core",
   "description": "If core utilities.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": {
     "name": "Green Software Foundation",
     "email": "info@gsf.com"
@@ -30,7 +30,10 @@
     "npm": ">=8"
   },
   "files": [
-    "dist/**/*"
+    "./types/**/*",
+    "./utils/**/*",
+    "./index.d.ts",
+    "./index.js"
   ],
   "homepage": "https://greensoftware.foundation",
   "keywords": [
