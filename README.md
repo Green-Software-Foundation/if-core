@@ -15,7 +15,7 @@ npm install @grnsft/if-core
 Here you can see usage example for plugin development:
 
 ```ts
-import {ERRORS} from "@grnsft/if-core"
+import {ERRORS} from "@grnsft/if-core/utils"
 import {PluginParams, CustomConfig} from "@grnsft/if-core/types"
 
 const {GlobalConfigError, MissingInputDataError} = ERRORS
