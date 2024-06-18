@@ -1,6 +1,6 @@
 # if-core
 
-Here you can find necessary utilities for plugin development.
+Here you can find all the necessary utilities for plugin development.
 
 ## Installing
 
@@ -11,6 +11,8 @@ npm install @grnsft/if-core
 ```
 
 ## Usage
+
+>Note: For proper error handling, you have to use error classes from `@grnsft/if-core/utils`.
 
 Here you can see usage example for plugin development:
 
