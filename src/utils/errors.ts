@@ -1,5 +1,4 @@
 const CUSTOM_ERRORS = [
-  'CliInputError',
   'ManifestValidationError',
   'InputValidationError',
   'InvalidGroupingError',
