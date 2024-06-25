@@ -2,3 +2,6 @@ build/
 dist/
 src/**/**.d.ts
 src/**/**.js
+types
+utils
+index**
