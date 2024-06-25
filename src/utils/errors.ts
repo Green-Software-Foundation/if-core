@@ -11,6 +11,7 @@ const CUSTOM_ERRORS = [
   'MissingAggregationParamError',
   'MissingPluginMethodError',
   'MissingPluginPathError',
+  'MissingPluginDependenciesError',
   'PluginInitializationError',
   'InvalidExhaustPluginError',
   /** Plugins */
