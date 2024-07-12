@@ -69,8 +69,22 @@ export type ExecutePlugin = {
   ) => PluginParams[] | Promise<PluginParams[]>;
   metadata: {
     kind: string;
+    inputs?: ParameterMetadata;
+    outputs?: ParameterMetadata;
   };
   [key: string]: any;
+};
+
+export type ParameterMetadata = {
+  [key: string]: {
+    description: string;
+    unit: string;
+  };
+};
+
+export type PluginParametersMetadata = {
+  inputs: ParameterMetadata;
+  outputs: ParameterMetadata;
 };
 
 /** Time sync */
