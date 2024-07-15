@@ -11,6 +11,7 @@ const CUSTOM_ERRORS = [
   'InvalidDirectoryError',
   'MissingAggregationParamError',
   'MissingCliFlagsError',
+  'MissingManifestDependenciesError',
   'MissingPluginMethodError',
   'MissingPluginPathError',
   'MissingPluginDependenciesError',
