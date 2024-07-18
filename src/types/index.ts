@@ -109,3 +109,16 @@ export type TimeParams = {
 
 /** Common */
 export type ConfigParams = Record<string, any>;
+
+/** Group-by */
+export type GroupByPlugin = {
+  execute: (inputs: PluginParams[], config: GroupByConfig) => {children: any};
+  metadata: {
+    kind: string;
+  };
+  [key: string]: any;
+};
+
+export type GroupByConfig = {
+  group: string[];
+};
