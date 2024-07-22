@@ -31,6 +31,9 @@ const CUSTOM_ERRORS = [
   'InvalidInputError',
   'ExhaustOutputArgError',
   'CSVParseError',
+  /** Requests errors */
+  'APIRequestError',
+  'AuthorizationError',
 ] as const;
 
 type CustomErrors = {
