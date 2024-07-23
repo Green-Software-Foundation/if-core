@@ -79,6 +79,7 @@ export type ParameterMetadata = {
   [key: string]: {
     description: string;
     unit: string;
+    aggregationMethod: 'sum' | 'avg' | 'none';
   };
 };
 

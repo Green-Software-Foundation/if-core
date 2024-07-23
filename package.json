@@ -10,7 +10,8 @@
     "url": "https://github.com/Green-Software-Foundation/if-core/issues"
   },
   "dependencies": {
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/core": "7.22.10",
