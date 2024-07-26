@@ -110,6 +110,7 @@ export type TimeParams = {
 
 /** Common */
 export type ConfigParams = Record<string, any>;
+export type MappingParams = Record<string, string>;
 
 /** Group-by */
 export type GroupByPlugin = {
