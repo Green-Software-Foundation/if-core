@@ -18,7 +18,7 @@ const CUSTOM_ERRORS = [
   'PluginInitializationError',
   'InvalidExhaustPluginError',
   /** Plugins */
-  'GlobalConfigError',
+  'ConfigError',
   'MissingInputDataError',
   'ProcessExecutionError',
   'RegexMismatchError',
