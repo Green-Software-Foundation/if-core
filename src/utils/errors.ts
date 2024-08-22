@@ -17,7 +17,7 @@ const CUSTOM_ERRORS = [
   'MissingPluginDependenciesError',
   'PluginInitializationError',
   'InvalidExhaustPluginError',
-  'WrongArthimeticOperationError',
+  'WrongArithmeticOperationError',
   'ZeroDivisionArthimeticOperationError',
   /** Plugins */
   'ConfigError',
