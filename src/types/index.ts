@@ -1,3 +1,5 @@
+import { AGGREGATION_METHODS } from '../consts';
+
 /** Coefficient */
 export type CoefficientConfig = {
   'input-parameter': string;
@@ -74,6 +76,8 @@ export type ExecutePlugin = {
   };
   [key: string]: any;
 };
+
+export type AggregationMethodTypes = (typeof AGGREGATION_METHODS)[number];
 
 export type ParameterMetadata = {
   [key: string]: {
