@@ -128,3 +128,9 @@ export type GroupByPlugin = {
 export type GroupByConfig = {
   group: string[];
 };
+
+export type ArithmeticParameters = {
+  config: any;
+  input: PluginParams;
+  parametersToEvaluate: string[];
+};

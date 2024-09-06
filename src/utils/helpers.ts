@@ -1,5 +1,7 @@
 import {MappingParams, PluginParams} from '../types';
 
+import {getParameterFromArithmeticExpression} from './arithmetic-helper';
+
 /**
  * Maps input data if the mapping has valid data.
  */
@@ -33,17 +35,32 @@ export const mapConfigIfNeeded = (config: any, mapping: MappingParams) => {
   }
 
   const result: Record<string, any> = Array.isArray(config) ? [] : {};
+  const parametersToRemove: string[] = [];
 
   Object.entries(config).forEach(([key, value]) => {
     const mappedKey = mapping[key] || key;
-
     if (typeof value === 'object' && value !== null) {
       result[mappedKey] = mapConfigIfNeeded(value, mapping);
     } else {
-      result[mappedKey] =
-        typeof value === 'string' && value in mapping ? mapping[value] : value;
+      if (typeof value === 'string' && value.includes('=')) {
+        const extractedValue = getParameterFromArithmeticExpression(value);
+        if (extractedValue in mapping) {
+          value = value.replace(extractedValue, mapping[extractedValue]);
+        }
+        result[mappedKey] = value;
+        parametersToRemove.push(extractedValue);
+      } else {
+        result[mappedKey] =
+          typeof value === 'string' && value in mapping
+            ? mapping[value]
+            : value;
+
+        parametersToRemove.push(value as string);
+      }
     }
   });
+
+  parametersToRemove.forEach(value => delete mapping[value]);
 
   return result;
 };
