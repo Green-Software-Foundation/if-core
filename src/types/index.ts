@@ -85,9 +85,9 @@ export type AggregationParams = {
 } 
 export type ParameterMetadata = {
   [key: string]: {
-      description: string;
-      unit: string;
-      'aggregation-method': AggregationParams;
+    description: string;
+    unit: string;
+    'aggregation-method': AggregationParams;
   };
 };
 
