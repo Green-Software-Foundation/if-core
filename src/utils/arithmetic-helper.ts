@@ -168,7 +168,7 @@ const evaluateArithmeticExpression = (
   const params: string[] = [];
 
   operands.forEach(operand => {
-    if (operand && !isNaN(parseInt(operand))) {
+    if (operand && !isNaN(Number(operand))) {
       params.push(operand);
     } else if (typeof operand === 'string') {
       if (operand.length === 1 && !operand.match(/[\+\-\*/]/)) {
