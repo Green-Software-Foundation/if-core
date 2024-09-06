@@ -79,15 +79,11 @@ export type ExecutePlugin = {
 
 export type AggregationMethodTypes = (typeof AGGREGATION_METHODS)[number];
 
-export type AggregationParams = {
-  time: AggregationMethodTypes,
-  component: AggregationMethodTypes
-} 
 export type ParameterMetadata = {
   [key: string]: {
     description: string;
     unit: string;
-    'aggregation-method': AggregationParams;
+    'aggregation-method': AggregationMethodTypes;
   };
 };
 
