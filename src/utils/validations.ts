@@ -1,6 +1,6 @@
 import {ZodIssue, ZodIssueCode, ZodSchema} from 'zod';
 
-import {ERRORS} from '../utils';
+import {ERRORS, isValidArithmeticExpression} from '../utils';
 
 const {InputValidationError} = ERRORS;
 
@@ -60,4 +60,25 @@ const flattenPath = (path: (string | number)[]): string => {
   );
 
   return flattenPath.join('.');
+};
+
+/**
+ * Validates if the provided value is a valid arithmetic expression for the given parameter.
+ *
+ * If the value contains an equal sign ('=') but is not a valid arithmetic expression,
+ * or if it does not contain an equal sign but is a valid arithmetic expression,
+ * an InputValidationError is thrown with an appropriate error message.
+ */
+export const validateArithmeticExpression = (paramName: string, value: any) => {
+  if (
+    typeof value === 'string' &&
+    ((value?.includes('=') && !isValidArithmeticExpression(value)) ||
+      (!value?.includes('=') && isValidArithmeticExpression(value)))
+  ) {
+    throw new InputValidationError(
+      `The \`${paramName}\` contains an invalid arithmetic expression. It should start with \`=\` and include the symbols \`*\`, \`+\`, \`-\` and \`/\`.`
+    );
+  }
+
+  return value;
 };
