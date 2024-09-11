@@ -122,78 +122,166 @@ export const isValidArithmeticExpression = (parameter: string) => {
     /^\s*(\d+(\.\d+)?|["']?[a-zA-Z0-9-]+["']?)(\s*[-+*/]\s*(\d+(\.\d+)?|["']?[a-zA-Z0-9-]+["']?))*\s*$/;
   const checkedParameter = getParameterFromArithmeticExpression(parameter);
 
-  return (
+  return !!(
     parameter !== checkedParameter &&
     parameter.replace('=', '').match(arithmeticExpression)
   );
 };
 
 /**
- * Evaluates an arithmetic expression, either directly if the expression contains
- * only numbers and basic mathematical operators (+, -, *, /), or by replacing
- * parameters with corresponding values from the input if specified.
+ * Evaluates an arithmetic expression by validating it first,
+ * then either returning the original expression or evaluating its value.
  *
- * - If the expression is not a valid arithmetic expression or if the key is not
- *   included in `parametersToEvaluate` (if provided), the function returns the original expression.
- * - For valid arithmetic expressions with parameters, it replaces parameters with values from `input`.
- * - It handles special cases like division by zero and missing input data, throwing errors when necessary.
- * - The final arithmetic result is computed using the `eval` function
+ * The function performs the following:
+ * 1. Checks if the expression is valid based on the provided parameters.
+ * 2. If valid, it returns the original expression.
+ * 3. If the expression is a basic arithmetic operation, it evaluates the expression.
+ * 4. If not, it proceeds to evaluate more complex expressions.
  */
 const evaluateArithmeticExpression = (
   expression: string,
-  key: string,
-  parametersToEvaluate: string[] | undefined,
+  parameterValue: string,
+  parametersToEvaluate: string[],
   input: PluginParams
 ) => {
-  const onlyNumberAndMathSymbols =
-    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
-
-  if (
-    typeof expression !== 'string' ||
-    (!expression.includes('=') &&
-      !expression.match(onlyNumberAndMathSymbols)) ||
-    (parametersToEvaluate?.length && !parametersToEvaluate.includes(key))
-  ) {
+  if (isExpressionValid(expression, parameterValue, parametersToEvaluate)) {
     return expression;
   }
 
   const replacedValue = expression.replace('=', '');
 
-  if (replacedValue.match(onlyNumberAndMathSymbols)) {
-    expression = eval(replacedValue);
-    return expression;
+  if (isBasicArithmetic(replacedValue)) {
+    return eval(expression);
   }
 
+  return evaluateComplexExpression(
+    expression,
+    parameterValue,
+    parametersToEvaluate,
+    input
+  );
+};
+
+/**
+ * Validates whether a given expression is a valid arithmetic expression or not.
+ */
+const isExpressionValid = (
+  expression: string,
+  parameterValue: string,
+  parametersToEvaluate: string[]
+) => {
+  const onlyNumberAndMathSymbols =
+    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
+
+  return (
+    typeof expression !== 'string' ||
+    (!expression.includes('=') &&
+      !expression.match(onlyNumberAndMathSymbols)) ||
+    (parametersToEvaluate?.length &&
+      !parametersToEvaluate.includes(parameterValue))
+  );
+};
+
+/**
+ * Checks if a given string is a basic arithmetic expression.
+ * Validates if the input string consists only of numbers
+ * and basic arithmetic operators (+, -, *, /).
+ */
+const isBasicArithmetic = (expression: string): boolean => {
+  const onlyNumberAndMathSymbols =
+    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
+  return onlyNumberAndMathSymbols.test(expression);
+};
+
+/**
+ * Evaluates a complex arithmetic expression by parsing it into operands,
+ * validating whether each operand is a number or an operator, and evaluating
+ * any parameters within the expression. The resulting valid operands are
+ * joined together and evaluated using `eval`.
+ */
+const evaluateComplexExpression = (
+  expression: string,
+  parameterValue: string,
+  parametersToEvaluate: string[],
+  input: PluginParams
+) => {
   const operands = parseArithmeticParameter(expression);
   const params: string[] = [];
 
   operands.forEach(operand => {
+    // Check if the operand is a number
     if (operand && !isNaN(Number(operand))) {
       params.push(operand);
-    } else if (typeof operand === 'string') {
-      if (operand.length === 1 && !operand.match(/[\+\-\*/]/)) {
-        throw new WrongArithmeticExpressionError(
-          `The operator in \`${expression}\` should be one of these arithmetic operators: *, +, - or \\.`
-        );
-      } else if (operand.length === 1) {
-        params.push(operand);
-      } else {
-        if (operand in input) {
-          if (input[operand] === 0 && operands.includes('/')) {
-            throw new ZeroDivisionArithmeticOperationError(
-              `Division by zero in \`${key}: ${expression}\` using input parameter \`${operand}\`.`
-            );
-          }
-
-          params.push(input[operand]);
-        } else {
-          throw new InputValidationError(
-            `${operand} is missing from the input array, or has nullish value.`
-          );
-        }
-      }
+    } else if (isOperandOperator(operand, expression)) {
+      params.push(operand);
+    } else {
+      const evaluatedOperand = evaluateOperand({
+        parameter: operand,
+        expression,
+        parameterValue,
+        parametersToEvaluate,
+        input,
+      });
+      params.push(evaluatedOperand);
     }
   });
 
   return params.length ? eval(params.join('')) : expression;
+};
+
+/**
+ * Checks if a given operand is a valid arithmetic operator within an expression.
+ * Throws an error if the operand is not one of the allowed arithmetic operators: *, +, -, or /.
+ */
+const isOperandOperator = (operand: string, expression: string) => {
+  if (operand.length === 1 && !/[\+\-\*/]/.test(operand)) {
+    throw new WrongArithmeticExpressionError(
+      `The operator in \`${expression}\` should be one of these arithmetic operators: *, +, - or \\.`
+    );
+  } else if (operand.length === 1) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Evaluates the value of a given parameter from the input.
+ * If the parameter's value is an arithmetic expression, it evaluates the expression.
+ * Otherwise, it returns the parameter's value directly.
+ */
+const evaluateOperand = (operandOptions: {
+  parameter: string;
+  expression: string;
+  parameterValue: string;
+  parametersToEvaluate: string[];
+  input: PluginParams;
+}) => {
+  const {parameter, expression, parameterValue, parametersToEvaluate, input} =
+    operandOptions;
+
+  if (!(parameter in input)) {
+    throw new InputValidationError(
+      `${parameter} is missing from the input array or has nullish value.`
+    );
+  }
+
+  const isExpression = isValidArithmeticExpression(input[parameter]);
+
+  if (isExpression) {
+    return evaluateArithmeticExpression(
+      input[parameter],
+      parameter,
+      [...(parametersToEvaluate || []), parameter],
+      input
+    );
+  }
+
+  if (input[parameter] === 0 && expression.includes('/')) {
+    throw new ZeroDivisionArithmeticOperationError(
+      `Division by zero in \`${parameterValue}: ${expression}\` using input parameter \`${parameter}\`.`
+    );
+  }
+
+  return input[parameter];
 };
