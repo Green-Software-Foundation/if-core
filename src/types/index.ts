@@ -1,3 +1,5 @@
+import z from 'zod';
+
 import { AGGREGATION_METHODS } from '../consts';
 
 /** Coefficient */
@@ -138,4 +140,12 @@ export type ArithmeticParameters = {
   config: any;
   input: PluginParams;
   parametersToEvaluate: string[];
+};
+
+export type PluginFactoryParams = {
+  metadata: any;
+  implementation: (input: any, config: any) => any;
+  configValidationSchema: z.ZodSchema;
+  inputValidationSchema: z.ZodSchema;
+  enableArithmeticExpressions?: boolean;
 };
