@@ -32,6 +32,7 @@
   },
   "files": [
     "./consts/**/*",
+    "./interfaces/**/*",
     "./types/**/*",
     "./utils/**/*",
     "./index.d.ts",
@@ -51,7 +52,7 @@
   },
   "scripts": {
     "build": "npm run clean && tsc --project tsconfig.build.json",
-    "clean": "rimraf dist/",
+    "clean": "rimraf utils/ types/ interfaces/ consts/ index.d.ts index.js",
     "fix": "gts fix",
     "fix:package": "fixpack",
     "lint": "gts lint",
