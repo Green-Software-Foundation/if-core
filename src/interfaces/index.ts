@@ -31,29 +31,38 @@ export const PluginFactory =
     execute: async (inputs: PluginParams[]) => {
       const {
         implementation,
-        configValidationSchema,
-        inputValidationSchema,
+        configValidation,
+        inputValidation,
         enableArithmeticExpressions,
       } = params;
-      const mappedConfig = mapConfigIfNeeded(config, mapping);
-
-      // Validate config using the provided configSchema
-      const safeConfig = validate<z.infer<typeof configValidationSchema>>(
-        configValidationSchema as ZodType<any>,
-        mappedConfig
-      );
 
       if (enableArithmeticExpressions) {
         // our implementation
       }
-      // Validate each input using the inputSchema
-      const safeInputs = inputs.map(input =>
-        validate<z.infer<typeof inputValidationSchema>>(
-          inputValidationSchema as ZodType<any>,
-          input
-        )
-      );
 
+      const mappedConfig = mapConfigIfNeeded(config, mapping);
+      // Validate config using the provided configSchema
+      const safeConfig =
+        typeof configValidation === 'function'
+          ? configValidation(config)
+          : validate<z.infer<typeof configValidation>>(
+              configValidation as ZodType<any>,
+              mappedConfig
+            );
+
+      // Validate each input using the inputSchema
+      const safeInputs = inputs.map(input => {
+        if (typeof inputValidation === 'function') {
+          return inputValidation(input, config);
+        }
+
+        return validate<z.infer<typeof inputValidation>>(
+          inputValidation as ZodType<any>,
+          input
+        );
+      });
+
+      // Apply mapping to inputs if needed
       inputs = safeInputs.map((safeInput, index) => ({
         ...inputs[index],
         ...mapInputIfNeeded(safeInput, mapping),
