@@ -142,10 +142,19 @@ export type ArithmeticParameters = {
   parametersToEvaluate: string[];
 };
 
+/**
+ * Plugin factory types.
+ */
+export type InputValidatorFunction = (
+  input: PluginParams,
+  config: ConfigParams
+) => PluginParams;
+export type ConfigValidatorFunction = (config: ConfigParams) => ConfigParams;
+
 export type PluginFactoryParams = {
   metadata: any;
   implementation: (input: any, config: any) => any;
-  configValidationSchema: z.ZodSchema;
-  inputValidationSchema: z.ZodSchema;
+  configValidation: z.ZodSchema | ConfigValidatorFunction;
+  inputValidation: z.ZodSchema | InputValidatorFunction;
   enableArithmeticExpressions?: boolean;
 };
