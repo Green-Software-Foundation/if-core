@@ -60,8 +60,8 @@ export const evaluateArithmeticOutput = (
   if (outputParameter.includes('=') && checkedOutputParameter) {
     const transformedOutputParameter = outputParameter
       .replace('=', '')
-      .replace(`${checkedOutputParameter}`, calculatedResult.toString());
-
+      .replace(`${checkedOutputParameter}`, calculatedResult.toString())
+      .replace(/['"]/g, '');
     const result = eval(transformedOutputParameter);
 
     return {[checkedOutputParameter]: result};
@@ -284,4 +284,17 @@ const evaluateOperand = (operandOptions: {
   }
 
   return input[parameter];
+};
+
+/**
+ * Evaluates a simple arithmetic expression if the input is a valid expression.
+ * It checks if the input string follows a pattern for simple arithmetic
+ * operations (numbers with operators like *, /, +, -) between them.
+ */
+export const evaluateSimpleArithmeticExpression = (parameter: string) => {
+  const simpleExpressionRegex = /^\d+([*_/+])\d+$/;
+
+  return typeof parameter === 'string' && parameter.match(simpleExpressionRegex)
+    ? eval(parameter)
+    : parameter;
 };
