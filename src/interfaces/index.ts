@@ -14,6 +14,14 @@ import {
   PluginParams,
 } from '../types';
 
+import {
+  evaluateInput,
+  evaluateConfig,
+  evaluateArithmeticOutput,
+  getParameterFromArithmeticExpression,
+  evaluateSimpleArithmeticExpression,
+} from '../utils/arithmetic-helper';
+
 /**
  * Creates plugin instance according to given parameters.
  */
@@ -25,6 +33,7 @@ export const PluginFactory =
     mapping: MappingParams
   ) => ({
     metadata: {
+      kind: 'execute',
       inputs: {...params.metadata.inputs, ...parametersMetadata?.inputs},
       outputs: parametersMetadata?.outputs || params.metadata.outputs,
     },
@@ -33,27 +42,56 @@ export const PluginFactory =
         implementation,
         configValidation,
         inputValidation,
-        enableArithmeticExpressions,
+        allowArithmeticExpressions,
       } = params;
+      let evaluatedConfig;
+      let outputParam: string;
+      const pureConfig: ConfigParams = {};
+      const isArithmeticEnable = !!allowArithmeticExpressions?.length;
+      const mappedConfig: ConfigParams = mapConfigIfNeeded(config, mapping);
 
-      if (enableArithmeticExpressions) {
-        // our implementation
+      if (isArithmeticEnable) {
+        Object.entries(mappedConfig).forEach(([paramKey, paramValue]) => {
+          mappedConfig[paramKey] =
+            evaluateSimpleArithmeticExpression(paramValue);
+        });
+
+        inputs = inputs.map(input => {
+          const evaluatedInput = evaluateInput(input);
+          evaluatedConfig = evaluateConfig({
+            config: mappedConfig,
+            input: evaluatedInput,
+            parametersToEvaluate: allowArithmeticExpressions,
+          });
+
+          return evaluatedInput;
+        });
       }
 
-      const mappedConfig = mapConfigIfNeeded(config, mapping);
-      // Validate config using the provided configSchema
+      // Validate config using the provided configValidation function or schema
       const safeConfig =
         typeof configValidation === 'function'
-          ? configValidation(config)
+          ? configValidation(mappedConfig)
           : validate<z.infer<typeof configValidation>>(
               configValidation as ZodType<any>,
               mappedConfig
             );
 
-      // Validate each input using the inputSchema
+      if (isArithmeticEnable) {
+        Object.entries(safeConfig).forEach(([paramKey, paramValue]) => {
+          pureConfig[paramKey] = getParameterFromArithmeticExpression(
+            paramValue as string
+          );
+        });
+      }
+
+      // Validate each input using the inputValidation function or schema
       const safeInputs = inputs.map(input => {
         if (typeof inputValidation === 'function') {
-          return inputValidation(input, config);
+          return inputValidation(
+            input,
+            Object.keys(pureConfig).length ? pureConfig : mappedConfig
+          );
         }
 
         return validate<z.infer<typeof inputValidation>>(
@@ -70,12 +108,26 @@ export const PluginFactory =
       config = mapConfigIfNeeded(config, mapping);
 
       // Execute the callback with the validated and possibly mapped inputs
-      const outputs = await implementation(inputs, safeConfig);
-      const appendOutputsToInputs = inputs.map((input, index) => ({
-        ...input,
-        ...outputs[index],
-      }));
+      const outputs = await implementation(
+        inputs,
+        evaluatedConfig || safeConfig
+      );
 
-      return mapOutputIfNeeded(appendOutputsToInputs, mapping);
+      if (isArithmeticEnable) {
+        outputParam = Object.keys(outputs[0]).filter(
+          ouptut => !Object.keys(inputs[0]).includes(ouptut)
+        )[0];
+      }
+      return inputs.map((input, index) => {
+        let output;
+        if (isArithmeticEnable) {
+          const outputParamValue = outputs[index][outputParam];
+          output = evaluateArithmeticOutput(outputParam, outputParamValue);
+        }
+        return {
+          ...input,
+          ...mapOutputIfNeeded(output || outputs[index], mapping),
+        };
+      });
     },
   });
