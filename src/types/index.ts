@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { AGGREGATION_METHODS } from '../consts';
+import {AGGREGATION_METHODS} from '../consts';
 
 /** Coefficient */
 export type CoefficientConfig = {
@@ -82,9 +82,9 @@ export type ExecutePlugin = {
 export type AggregationMethodTypes = (typeof AGGREGATION_METHODS)[number];
 
 export type AggregationOptions = {
-  time: AggregationMethodTypes,
-  component: AggregationMethodTypes
-} 
+  time: AggregationMethodTypes;
+  component: AggregationMethodTypes;
+};
 
 export type ParameterMetadata = {
   [key: string]: {
@@ -156,5 +156,5 @@ export type PluginFactoryParams = {
   implementation: (input: any, config: any) => any;
   configValidation: z.ZodSchema | ConfigValidatorFunction;
   inputValidation: z.ZodSchema | InputValidatorFunction;
-  enableArithmeticExpressions?: boolean;
+  allowArithmeticExpressions?: string[];
 };
