@@ -155,6 +155,6 @@ export type PluginFactoryParams = {
   metadata: any;
   implementation: (input: any, config: any) => any;
   configValidation: z.ZodSchema | ConfigValidatorFunction;
-  inputValidation: z.ZodSchema | InputValidatorFunction;
+  inputValidation?: z.ZodSchema | InputValidatorFunction;
   allowArithmeticExpressions?: string[];
 };
