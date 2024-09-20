@@ -46,7 +46,7 @@ export const PluginFactory =
       } = params;
       let evaluatedConfig;
       let outputParam: string;
-      const pureConfig: ConfigParams = {};
+      const expressionCleanedConfig: ConfigParams = {};
       const isArithmeticEnable = !!allowArithmeticExpressions?.length;
       const mappedConfig: ConfigParams = mapConfigIfNeeded(config, mapping);
 
@@ -77,11 +77,11 @@ export const PluginFactory =
               mappedConfig
             );
 
+      // Check if arithmetic expressions are enabled, store the cleaned version of the expression into expressionCleanedConfig
       if (isArithmeticEnable) {
         Object.entries(safeConfig).forEach(([paramKey, paramValue]) => {
-          pureConfig[paramKey] = getParameterFromArithmeticExpression(
-            paramValue as string
-          );
+          expressionCleanedConfig[paramKey] =
+            getParameterFromArithmeticExpression(paramValue as string);
         });
       }
 
@@ -90,7 +90,9 @@ export const PluginFactory =
         if (typeof inputValidation === 'function') {
           return inputValidation(
             input,
-            Object.keys(pureConfig).length ? pureConfig : mappedConfig
+            Object.keys(expressionCleanedConfig).length
+              ? expressionCleanedConfig
+              : mappedConfig
           );
         }
 
@@ -110,20 +112,25 @@ export const PluginFactory =
       // Execute the callback with the validated and possibly mapped inputs
       const outputs = await implementation(
         inputs,
-        evaluatedConfig || safeConfig
+        evaluatedConfig || mappedConfig
       );
 
+      // Check if arithmetic expressions are enabled, get output parameter
       if (isArithmeticEnable) {
         outputParam = Object.keys(outputs[0]).filter(
           ouptut => !Object.keys(inputs[0]).includes(ouptut)
         )[0];
       }
+
       return inputs.map((input, index) => {
         let output;
+
+        // Check if arithmetic expressions are enabled, evaluate output parameter
         if (isArithmeticEnable) {
           const outputParamValue = outputs[index][outputParam];
           output = evaluateArithmeticOutput(outputParam, outputParamValue);
         }
+
         return {
           ...input,
           ...mapOutputIfNeeded(output || outputs[index], mapping),
