@@ -47,7 +47,7 @@ export const PluginFactory =
       let evaluatedConfig;
       let outputParam: string;
       const expressionCleanedConfig: ConfigParams = {};
-      const isArithmeticEnable = !!allowArithmeticExpressions?.length;
+      const isArithmeticEnable = !!allowArithmeticExpressions;
       const mappedConfig: ConfigParams = mapConfigIfNeeded(config, mapping);
 
       if (isArithmeticEnable) {
@@ -58,6 +58,7 @@ export const PluginFactory =
 
         inputs = inputs.map(input => {
           const evaluatedInput = evaluateInput(input);
+
           evaluatedConfig = evaluateConfig({
             config: mappedConfig,
             input: evaluatedInput,
@@ -87,6 +88,8 @@ export const PluginFactory =
 
       // Validate each input using the inputValidation function or schema
       const safeInputs = inputs.map(input => {
+        if (!inputValidation) return input;
+
         if (typeof inputValidation === 'function') {
           return inputValidation(
             input,
@@ -107,7 +110,6 @@ export const PluginFactory =
         ...inputs[index],
         ...mapInputIfNeeded(safeInput, mapping),
       }));
-      config = mapConfigIfNeeded(config, mapping);
 
       // Execute the callback with the validated and possibly mapped inputs
       const outputs = await implementation(
