@@ -37,7 +37,10 @@ export const getParameterFromArithmeticExpression = (
   const regex = /["']?([a-zA-Z]+(?:[-/][a-zA-Z]+)*)["']?/;
   let match;
 
-  if ((match = regex.exec(arithmeticParameter)) !== null) {
+  if (
+    typeof arithmeticParameter === 'string' &&
+    (match = regex.exec(arithmeticParameter)) !== null
+  ) {
     return match[1];
   }
   return arithmeticParameter;
@@ -97,14 +100,15 @@ export const evaluateInput = (input: PluginParams) => {
 export const evaluateConfig = (options: ArithmeticParameters) => {
   const {config, input, parametersToEvaluate} = options;
   const evaluatedConfig = Object.assign({}, config);
-
   Object.keys(evaluatedConfig).forEach(key => {
-    evaluatedConfig[key] = evaluateArithmeticExpression(
-      evaluatedConfig[key],
-      key,
-      parametersToEvaluate,
-      input
-    );
+    if (parametersToEvaluate.includes(key)) {
+      evaluatedConfig[key] = evaluateArithmeticExpression(
+        evaluatedConfig[key],
+        key,
+        parametersToEvaluate,
+        input
+      );
+    }
   });
 
   return evaluatedConfig;
@@ -147,7 +151,6 @@ const evaluateArithmeticExpression = (
   if (isExpressionValid(expression, parameterValue, parametersToEvaluate)) {
     return expression;
   }
-
   const replacedValue = expression.replace('=', '');
 
   if (isBasicArithmetic(replacedValue)) {
@@ -294,7 +297,8 @@ const evaluateOperand = (operandOptions: {
 export const evaluateSimpleArithmeticExpression = (parameter: string) => {
   const simpleExpressionRegex = /^\d+([*_/+])\d+$/;
 
-  return typeof parameter === 'string' && parameter.match(simpleExpressionRegex)
-    ? eval(parameter)
+  return typeof parameter === 'string' &&
+    parameter.replace('=', '').match(simpleExpressionRegex)
+    ? eval(parameter.replace('=', ''))
     : parameter;
 };
