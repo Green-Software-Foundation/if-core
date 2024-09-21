@@ -95,7 +95,7 @@ export const PluginFactory =
             input,
             Object.keys(expressionCleanedConfig).length
               ? expressionCleanedConfig
-              : mappedConfig
+              : safeConfig
           );
         }
 
@@ -112,10 +112,10 @@ export const PluginFactory =
       }));
 
       // Execute the callback with the validated and possibly mapped inputs
-      const outputs = await implementation(
-        inputs,
-        evaluatedConfig || mappedConfig
-      );
+      const outputs = await implementation(inputs, {
+        ...safeConfig,
+        ...(evaluatedConfig || {}),
+      });
 
       // Check if arithmetic expressions are enabled, get output parameter
       if (isArithmeticEnable) {
