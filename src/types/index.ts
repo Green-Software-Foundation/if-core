@@ -2,20 +2,6 @@ import z from 'zod';
 
 import {AGGREGATION_METHODS} from '../consts';
 
-/** Coefficient */
-export type CoefficientConfig = {
-  'input-parameter': string;
-  coefficient: number;
-  'output-parameter': string;
-};
-
-/** Exponent */
-export type ExponentConfig = {
-  'input-parameter': string;
-  exponent: number;
-  'output-parameter': string;
-};
-
 /** Interpolation */
 export enum Method {
   LINEAR = 'linear',
@@ -154,7 +140,11 @@ export type ConfigValidatorFunction = (config: ConfigParams) => ConfigParams;
 
 export type PluginFactoryParams = {
   metadata: any;
-  implementation: (input: PluginParams, config: ConfigParams, mapping?: MappingParams) => any;
+  implementation: (
+    inputs: PluginParams[],
+    config: ConfigParams,
+    mapping?: MappingParams
+  ) => any;
   configValidation: z.ZodSchema | ConfigValidatorFunction;
   inputValidation?: z.ZodSchema | InputValidatorFunction;
   allowArithmeticExpressions?: string[];
