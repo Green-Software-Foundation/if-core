@@ -147,13 +147,14 @@ export type ArithmeticParameters = {
  */
 export type InputValidatorFunction = (
   input: PluginParams,
-  config: ConfigParams
+  config: ConfigParams,
+  index?: number
 ) => PluginParams;
 export type ConfigValidatorFunction = (config: ConfigParams) => ConfigParams;
 
 export type PluginFactoryParams = {
   metadata: any;
-  implementation: (input: any, config: any) => any;
+  implementation: (input: PluginParams, config: ConfigParams, mapping?: MappingParams) => any;
   configValidation: z.ZodSchema | ConfigValidatorFunction;
   inputValidation?: z.ZodSchema | InputValidatorFunction;
   allowArithmeticExpressions?: string[];
