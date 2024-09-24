@@ -115,6 +115,7 @@ export const PluginFactory =
       const outputs = await implementation(inputs, {
         ...safeConfig,
         ...(evaluatedConfig || {}),
+        mapping
       });
 
       // Check if arithmetic expressions are enabled, get output parameter
