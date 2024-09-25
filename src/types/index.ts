@@ -32,24 +32,6 @@ export type RandIntGeneratorParams = {
   max: number;
 };
 
-/** Multiply */
-export type MultiplyConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
-/** Substract */
-export type SubtractConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
-/** Sum */
-export type SumConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
 /** Interface */
 export type PluginParams = Record<string, any>;
 export type ExecutePlugin = {
