@@ -87,7 +87,7 @@ export const PluginFactory =
       }
 
       // Validate each input using the inputValidation function or schema
-      const safeInputs = inputs.map(input => {
+      const safeInputs = inputs.map((input, index) => {
         if (!inputValidation) return input;
 
         if (typeof inputValidation === 'function') {
@@ -95,13 +95,15 @@ export const PluginFactory =
             input,
             Object.keys(expressionCleanedConfig).length
               ? expressionCleanedConfig
-              : safeConfig
+              : safeConfig,
+            index
           );
         }
 
         return validate<z.infer<typeof inputValidation>>(
           inputValidation as ZodType<any>,
-          input
+          input,
+          index
         );
       });
 
@@ -115,7 +117,7 @@ export const PluginFactory =
       const outputs = await implementation(inputs, {
         ...safeConfig,
         ...(evaluatedConfig || {}),
-        mapping
+        mapping,
       });
 
       // Check if arithmetic expressions are enabled, get output parameter
