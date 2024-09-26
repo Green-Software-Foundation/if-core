@@ -54,17 +54,16 @@ export type AggregationOptions = {
   component: AggregationMethodTypes;
 };
 
-export type ParameterMetadata = {
-  [key: string]: {
+export type ParameterMetadata = Record<string, 
+  {
     description: string;
     unit: string;
     'aggregation-method': AggregationOptions;
-  };
-};
+  }>
 
 export type PluginParametersMetadata = {
-  inputs: ParameterMetadata;
-  outputs: ParameterMetadata;
+  inputs?: ParameterMetadata;
+  outputs?: ParameterMetadata;
 };
 
 /** Time sync */
@@ -120,14 +119,14 @@ export type InputValidatorFunction = (
 ) => PluginParams;
 export type ConfigValidatorFunction = (config: ConfigParams) => ConfigParams;
 
-export type PluginFactoryParams = {
-  metadata: any;
+export interface PluginFactoryParams<C = ConfigParams> {
+  metadata: PluginParametersMetadata;
   implementation: (
     inputs: PluginParams[],
-    config: ConfigParams,
+    config: C,
     mapping?: MappingParams
-  ) => any;
-  configValidation: z.ZodSchema | ConfigValidatorFunction;
+  ) => Promise<PluginParams[]>;
+  configValidation?: z.ZodSchema | ConfigValidatorFunction;
   inputValidation?: z.ZodSchema | InputValidatorFunction;
   allowArithmeticExpressions?: string[];
-};
+}
