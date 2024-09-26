@@ -26,14 +26,13 @@ import {
  * Creates plugin instance according to given parameters.
  */
 export const PluginFactory =
-  (params: PluginFactoryParams) =>
+  <C = ConfigParams>(params: PluginFactoryParams<C>) =>
   (
-    config: ConfigParams = {},
+    config: C = {} as C,
     parametersMetadata: PluginParametersMetadata,
     mapping: MappingParams
   ) => ({
     metadata: {
-      kind: 'execute',
       inputs: {...params.metadata.inputs, ...parametersMetadata?.inputs},
       outputs: parametersMetadata?.outputs || params.metadata.outputs,
     },
@@ -70,13 +69,13 @@ export const PluginFactory =
       }
 
       // Validate config using the provided configValidation function or schema
-      const safeConfig =
+      const safeConfig = configValidation ? 
         typeof configValidation === 'function'
           ? configValidation(mappedConfig)
           : validate<z.infer<typeof configValidation>>(
               configValidation as ZodType<any>,
               mappedConfig
-            );
+            ) : config
 
       // Check if arithmetic expressions are enabled, store the cleaned version of the expression into expressionCleanedConfig
       if (isArithmeticEnable) {
@@ -88,7 +87,9 @@ export const PluginFactory =
 
       // Validate each input using the inputValidation function or schema
       const safeInputs = inputs.map((input, index) => {
-        if (!inputValidation) return input;
+        if (!inputValidation) {
+          return input
+        };
 
         if (typeof inputValidation === 'function') {
           return inputValidation(
