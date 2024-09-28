@@ -128,18 +128,18 @@ export const PluginFactory =
         )[0];
       }
 
-      return inputs.map((input, index) => {
-        let output;
-
+      return outputs.map((output, index) => {
         // Check if arithmetic expressions are enabled, evaluate output parameter
-        if (isArithmeticEnable) {
-          const outputParamValue = outputs[index][outputParam];
-          output = evaluateArithmeticOutput(outputParam, outputParamValue);
-        }
-
+        const resultOutput = isArithmeticEnable
+          ? evaluateArithmeticOutput(outputParam, output[outputParam])
+          : output;
+      
+        // Merge input if it exists, otherwise just use the output
+        const correspondingInput = inputs[index] || {};
+        
         return {
-          ...input,
-          ...mapOutputIfNeeded(output || outputs[index], mapping),
+          ...correspondingInput,
+          ...mapOutputIfNeeded(resultOutput, mapping),
         };
       });
     },
