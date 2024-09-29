@@ -54,12 +54,14 @@ export type AggregationOptions = {
   component: AggregationMethodTypes;
 };
 
-export type ParameterMetadata = Record<string, 
+export type ParameterMetadata = Record<
+  string,
   {
     description: string;
     unit: string;
     'aggregation-method': AggregationOptions;
-  }>
+  }
+>;
 
 export type PluginParametersMetadata = {
   inputs?: ParameterMetadata;
@@ -117,7 +119,10 @@ export type InputValidatorFunction = (
   config: ConfigParams,
   index?: number
 ) => PluginParams;
-export type ConfigValidatorFunction = (config: ConfigParams) => ConfigParams;
+export type ConfigValidatorFunction = (
+  config: ConfigParams,
+  input?: PluginParams
+) => ConfigParams;
 
 export interface PluginFactoryParams<C = ConfigParams> {
   metadata: PluginParametersMetadata;
