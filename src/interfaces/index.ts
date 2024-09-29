@@ -4,6 +4,7 @@ import {
   mapConfigIfNeeded,
   mapInputIfNeeded,
   mapOutputIfNeeded,
+  removeMappedInputParameter,
   validate,
 } from '../utils';
 import {
@@ -33,6 +34,7 @@ export const PluginFactory =
     mapping: MappingParams
   ) => ({
     metadata: {
+      kind: 'execute',
       inputs: {...params.metadata.inputs, ...parametersMetadata?.inputs},
       outputs: parametersMetadata?.outputs || params.metadata.outputs,
     },
@@ -58,24 +60,44 @@ export const PluginFactory =
         inputs = inputs.map(input => {
           const evaluatedInput = evaluateInput(input);
 
-          evaluatedConfig = evaluateConfig({
-            config: mappedConfig,
-            input: evaluatedInput,
-            parametersToEvaluate: allowArithmeticExpressions,
-          });
+          // If the config is not provided, skip evaluating parameters functionality.
+          if (Object.keys(config || {}).length) {
+            evaluatedConfig = evaluateConfig({
+              config: mappedConfig,
+              input: evaluatedInput,
+              parametersToEvaluate: allowArithmeticExpressions,
+            });
+          }
 
           return evaluatedInput;
         });
       }
 
       // Validate config using the provided configValidation function or schema
-      const safeConfig = configValidation ? 
-        typeof configValidation === 'function'
+      const safeConfig = configValidation
+        ? typeof configValidation === 'function'
           ? configValidation(mappedConfig)
           : validate<z.infer<typeof configValidation>>(
               configValidation as ZodType<any>,
               mappedConfig
-            ) : config
+            )
+        : config;
+
+      // In case of the config is not provided, but the plugin has default a config,
+      // evaluates config parameters
+      if (
+        isArithmeticEnable &&
+        !Object.keys(config || {}).length &&
+        Object.keys(safeConfig || {}).length
+      ) {
+        inputs.forEach(input => {
+          evaluatedConfig = evaluateConfig({
+            config: mappedConfig,
+            input: input,
+            parametersToEvaluate: allowArithmeticExpressions,
+          });
+        });
+      }
 
       // Check if arithmetic expressions are enabled, store the cleaned version of the expression into expressionCleanedConfig
       if (isArithmeticEnable) {
@@ -88,8 +110,8 @@ export const PluginFactory =
       // Validate each input using the inputValidation function or schema
       const safeInputs = inputs.map((input, index) => {
         if (!inputValidation) {
-          return input
-        };
+          return input;
+        }
 
         if (typeof inputValidation === 'function') {
           return inputValidation(
@@ -110,8 +132,7 @@ export const PluginFactory =
 
       // Apply mapping to inputs if needed
       inputs = safeInputs.map((safeInput, index) => ({
-        ...inputs[index],
-        ...mapInputIfNeeded(safeInput, mapping),
+        ...mapInputIfNeeded({...inputs[index], ...safeInput}, mapping),
       }));
 
       // Execute the callback with the validated and possibly mapped inputs
@@ -133,10 +154,11 @@ export const PluginFactory =
         const resultOutput = isArithmeticEnable
           ? evaluateArithmeticOutput(outputParam, output[outputParam])
           : output;
-      
+
         // Merge input if it exists, otherwise just use the output
-        const correspondingInput = inputs[index] || {};
-        
+        const correspondingInput =
+          removeMappedInputParameter(inputs[index], mapping) || {};
+
         return {
           ...correspondingInput,
           ...mapOutputIfNeeded(resultOutput, mapping),
