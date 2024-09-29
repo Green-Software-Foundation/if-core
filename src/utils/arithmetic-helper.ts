@@ -283,6 +283,13 @@ const evaluateOperand = (operandOptions: {
     );
   }
 
+  // Checks if the parameter in the input array has number value.
+  if (isNaN(Number(input[parameter]))) {
+    throw new InputValidationError(
+      `The value of the \`${parameter}\` parameter in the input array is not a number.`
+    );
+  }
+
   const isExpression = isValidArithmeticExpression(expression);
 
   if (isExpression) {
@@ -326,7 +333,11 @@ export const evaluateSimpleArithmeticExpression = (parameter: string) => {
  * In case of an invalid format, it calls `validateExpressionFormat`.
  * The function returns true if the value is valid or numeric.
  */
-const validateArithmeticExpression = (parameterName: string, value: any) => {
+export const validateArithmeticExpression = (
+  parameterName: string,
+  value: any,
+  type?: any
+) => {
   if (typeof value === 'string') {
     const sanitizedValue = value.replace('=', '');
 
@@ -339,6 +350,12 @@ const validateArithmeticExpression = (parameterName: string, value: any) => {
     }
 
     validateExpressionFormat(parameterName, value);
+
+    if (type === 'number') {
+      const numberMatch = sanitizedValue.match(/[-+]?[0-9]*\.?[0-9]+/g);
+
+      return numberMatch ? parseFloat(numberMatch[0]) : value;
+    }
   }
 
   return value;
