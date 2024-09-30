@@ -13,9 +13,26 @@ export const mapInputIfNeeded = (
 
   Object.entries(mapping || {}).forEach(([key, value]) => {
     if (value in newInput) {
-      const mappedKey = input[value];
-      newInput[key] = mappedKey;
-      delete newInput[value];
+      const mappedParamValue = input[value];
+      newInput[key] = mappedParamValue;
+    }
+  });
+
+  return newInput;
+};
+
+/**
+ * Removes input parameters based on a provided mapping.
+ */
+export const removeMappedInputParameter = (
+  input: PluginParams,
+  mapping: MappingParams
+) => {
+  const newInput = Object.assign({}, input);
+
+  Object.entries(mapping || {}).forEach(([key, value]) => {
+    if (value in newInput) {
+      delete newInput[key];
     }
   });
 

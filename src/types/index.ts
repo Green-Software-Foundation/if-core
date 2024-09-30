@@ -1,18 +1,6 @@
-import { AGGREGATION_METHODS } from '../consts';
+import z from 'zod';
 
-/** Coefficient */
-export type CoefficientConfig = {
-  'input-parameter': string;
-  coefficient: number;
-  'output-parameter': string;
-};
-
-/** Exponent */
-export type ExponentConfig = {
-  'input-parameter': string;
-  exponent: number;
-  'output-parameter': string;
-};
+import {AGGREGATION_METHODS} from '../consts';
 
 /** Interpolation */
 export enum Method {
@@ -44,24 +32,6 @@ export type RandIntGeneratorParams = {
   max: number;
 };
 
-/** Multiply */
-export type MultiplyConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
-/** Substract */
-export type SubtractConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
-/** Sum */
-export type SumConfig = {
-  'input-parameters': string[];
-  'output-parameter': string;
-};
-
 /** Interface */
 export type PluginParams = Record<string, any>;
 export type ExecutePlugin = {
@@ -80,21 +50,22 @@ export type ExecutePlugin = {
 export type AggregationMethodTypes = (typeof AGGREGATION_METHODS)[number];
 
 export type AggregationOptions = {
-  time: AggregationMethodTypes,
-  component: AggregationMethodTypes
-} 
+  time: AggregationMethodTypes;
+  component: AggregationMethodTypes;
+};
 
-export type ParameterMetadata = {
-  [key: string]: {
+export type ParameterMetadata = Record<
+  string,
+  {
     description: string;
     unit: string;
     'aggregation-method': AggregationOptions;
-  };
-};
+  }
+>;
 
 export type PluginParametersMetadata = {
-  inputs: ParameterMetadata;
-  outputs: ParameterMetadata;
+  inputs?: ParameterMetadata;
+  outputs?: ParameterMetadata;
 };
 
 /** Time sync */
@@ -103,6 +74,7 @@ export type TimeNormalizerConfig = {
   'end-time': Date | string;
   interval: number;
   'allow-padding': boolean;
+  'upsampling-resolution'?: number;
 };
 
 export type PaddingReceipt = {
@@ -111,10 +83,11 @@ export type PaddingReceipt = {
 };
 
 export type TimeParams = {
-  startTime: DateTime;
+  startTime: DateTime; // luxon
   endTime: DateTime;
   interval: number;
   allowPadding: boolean;
+  upsamplingResolution: number;
 };
 
 /** Common */
@@ -139,3 +112,28 @@ export type ArithmeticParameters = {
   input: PluginParams;
   parametersToEvaluate: string[];
 };
+
+/**
+ * Plugin factory types.
+ */
+export type InputValidatorFunction = (
+  input: PluginParams,
+  config: ConfigParams,
+  index?: number
+) => PluginParams;
+export type ConfigValidatorFunction = (
+  config: ConfigParams,
+  input?: PluginParams
+) => ConfigParams;
+
+export interface PluginFactoryParams<C = ConfigParams> {
+  metadata?: PluginParametersMetadata;
+  implementation: (
+    inputs: PluginParams[],
+    config: C,
+    mapping?: MappingParams
+  ) => Promise<PluginParams[]>;
+  configValidation?: z.ZodSchema | ConfigValidatorFunction;
+  inputValidation?: z.ZodSchema | InputValidatorFunction;
+  allowArithmeticExpressions?: string[];
+}

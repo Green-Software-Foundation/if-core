@@ -1,6 +1,6 @@
 import {ZodIssue, ZodIssueCode, ZodSchema} from 'zod';
 
-import {ERRORS, isValidArithmeticExpression} from '../utils';
+import {ERRORS} from '../utils';
 
 const {InputValidationError} = ERRORS;
 
@@ -60,67 +60,4 @@ const flattenPath = (path: (string | number)[]): string => {
   );
 
   return flattenPath.join('.');
-};
-
-/**
- * Validates whether a given value is a valid arithmetic expression.
- *
- * If the value is a string, it first removes any equal signs and checks if it
- * is a valid arithmetic expression using the `isValidArithmeticExpression` helper.
- * If valid, it attempts to evaluate the expression and ensures the result is numeric.
- * In case of an invalid format, it calls `validateExpressionFormat`.
- * The function returns true if the value is valid or numeric.
- */
-export const validateArithmeticExpression = (
-  parameterName: string,
-  value: any
-) => {
-  if (typeof value === 'string') {
-    const sanitizedValue = value.replace('=', '');
-
-    if (isValidArithmeticExpression(sanitizedValue)) {
-      const evaluatedParam = evaluateExpression(sanitizedValue) || value;
-
-      if (!isNaN(Number(evaluatedParam))) {
-        return true;
-      }
-    }
-
-    validateExpressionFormat(parameterName, value);
-  }
-
-  return value;
-};
-
-/**
- * Helper function to evaluate the arithmetic expression.
- */
-const evaluateExpression = (expression: string) => {
-  try {
-    return eval(expression);
-  } catch {
-    return undefined;
-  }
-};
-
-/**
- * Validates whether the provided string value is a valid arithmetic expression based on its format.
- *
- * Checks if the expression contains an `=` sign and ensures that
- * the part of the string following the equal sign is a valid arithmetic expression.
- *
- * - If the string starts with `=`, the remaining part should be a valid arithmetic expression.
- * - If it doesn't start with `=`, the entire string should not resemble a valid arithmetic expression.
- *
- * Throws an `InputValidationError` error if the format or content of the arithmetic expression is invalid.
- */
-const validateExpressionFormat = (parameterName: string, value: string) => {
-  const hasEqualSign = value.includes('=');
-  const isValid = isValidArithmeticExpression(value.replace('=', ''));
-
-  if ((hasEqualSign && !isValid) || (!hasEqualSign && isValid)) {
-    throw new InputValidationError(
-      `The \`${parameterName}\` contains an invalid arithmetic expression. It should start with \`=\` and include the symbols \`*\`, \`+\`, \`-\` and \`/\`.`
-    );
-  }
 };

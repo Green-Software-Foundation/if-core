@@ -37,9 +37,13 @@ export const getParameterFromArithmeticExpression = (
   const regex = /["']?([a-zA-Z]+(?:[-/][a-zA-Z]+)*)["']?/;
   let match;
 
-  if ((match = regex.exec(arithmeticParameter)) !== null) {
+  if (
+    typeof arithmeticParameter === 'string' &&
+    (match = regex.exec(arithmeticParameter)) !== null
+  ) {
     return match[1];
   }
+
   return arithmeticParameter;
 };
 
@@ -56,15 +60,26 @@ export const evaluateArithmeticOutput = (
 ) => {
   const checkedOutputParameter =
     getParameterFromArithmeticExpression(outputParameter);
+  const isValidExpression = isValidArithmeticExpression(outputParameter);
 
-  if (outputParameter.includes('=') && checkedOutputParameter) {
+  if (
+    typeof outputParameter === 'string' &&
+    outputParameter.includes('=') &&
+    checkedOutputParameter &&
+    isValidExpression
+  ) {
     const transformedOutputParameter = outputParameter
       .replace('=', '')
-      .replace(`${checkedOutputParameter}`, calculatedResult.toString());
+      .replace(`${checkedOutputParameter}`, calculatedResult.toString())
+      .replace(/['"]/g, '');
 
-    const result = eval(transformedOutputParameter);
+    const result = evaluateExpression(transformedOutputParameter);
 
     return {[checkedOutputParameter]: result};
+  } else if (outputParameter !== checkedOutputParameter) {
+    throw new WrongArithmeticExpressionError(
+      `The output parameter \`${outputParameter}\` contains an invalid arithmetic expression. It should start with \`=\` and include the symbols \`*\`, \`+\`, \`-\` and \`/\`.`
+    );
   }
 
   return {[outputParameter]: calculatedResult};
@@ -76,6 +91,7 @@ export const evaluateArithmeticOutput = (
  */
 export const evaluateInput = (input: PluginParams) => {
   const evaluatedInput = Object.assign({}, input);
+
   Object.entries(input).map(([parameter, value]) => {
     evaluatedInput[parameter] = evaluateArithmeticExpression(
       value,
@@ -98,13 +114,17 @@ export const evaluateConfig = (options: ArithmeticParameters) => {
   const {config, input, parametersToEvaluate} = options;
   const evaluatedConfig = Object.assign({}, config);
 
-  Object.keys(evaluatedConfig).forEach(key => {
-    evaluatedConfig[key] = evaluateArithmeticExpression(
-      evaluatedConfig[key],
-      key,
-      parametersToEvaluate,
-      input
-    );
+  Object.keys(evaluatedConfig).forEach(parameter => {
+    if (parametersToEvaluate.includes(parameter)) {
+      validateArithmeticExpression(parameter, evaluatedConfig[parameter]);
+
+      evaluatedConfig[parameter] = evaluateArithmeticExpression(
+        evaluatedConfig[parameter],
+        parameter,
+        parametersToEvaluate,
+        input
+      );
+    }
   });
 
   return evaluatedConfig;
@@ -133,64 +153,61 @@ export const isValidArithmeticExpression = (parameter: string) => {
  * then either returning the original expression or evaluating its value.
  *
  * The function performs the following:
- * 1. Checks if the expression is valid based on the provided parameters.
- * 2. If valid, it returns the original expression.
- * 3. If the expression is a basic arithmetic operation, it evaluates the expression.
- * 4. If not, it proceeds to evaluate more complex expressions.
+ * 1. Checks if the paramenter is `timestamp`, returns the value.
+ * 2. Checks if the expression is valid based on the provided parameters.
+ * 3. If valid, it returns the original expression.
+ * 4. If the expression is a basic arithmetic operation, it evaluates the expression.
+ * 5. If not, it proceeds to evaluate more complex expressions.
  */
 const evaluateArithmeticExpression = (
   expression: string,
-  parameterValue: string,
+  parameter: string,
   parametersToEvaluate: string[],
   input: PluginParams
 ) => {
-  if (isExpressionValid(expression, parameterValue, parametersToEvaluate)) {
-    return expression;
-  }
+  if (parameter === 'timestamp') return input[parameter];
 
-  const replacedValue = expression.replace('=', '');
+  if (isNotArithmeticExpression(expression)) return expression;
 
-  if (isBasicArithmetic(replacedValue)) {
-    return eval(expression);
+  if (isBasicArithmetic(expression.replace('=', ''))) {
+    return evaluateExpression(expression);
   }
 
   return evaluateComplexExpression(
     expression,
-    parameterValue,
+    parameter,
     parametersToEvaluate,
     input
   );
 };
 
 /**
- * Validates whether a given expression is a valid arithmetic expression or not.
+ * Checks if the given expression is not an arithmetic expression.
  */
-const isExpressionValid = (
-  expression: string,
-  parameterValue: string,
-  parametersToEvaluate: string[]
-) => {
-  const onlyNumberAndMathSymbols =
-    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
-
+const isNotArithmeticExpression = (expression: string) => {
   return (
     typeof expression !== 'string' ||
-    (!expression.includes('=') &&
-      !expression.match(onlyNumberAndMathSymbols)) ||
-    (parametersToEvaluate?.length &&
-      !parametersToEvaluate.includes(parameterValue))
+    (!expression.includes('=') && !containsOnlyNumbersAndOperators(expression))
   );
 };
 
 /**
- * Checks if a given string is a basic arithmetic expression.
- * Validates if the input string consists only of numbers
- * and basic arithmetic operators (+, -, *, /).
+ * Utility function to check if a string contains only numbers and basic math operators.
+ */
+const containsOnlyNumbersAndOperators = (expression: string): boolean => {
+  const numberAndMathSymbolsRegex =
+    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
+  return numberAndMathSymbolsRegex.test(expression);
+};
+
+/**
+ * Checks if the provided expression is a basic arithmetic expression.
  */
 const isBasicArithmetic = (expression: string): boolean => {
-  const onlyNumberAndMathSymbols =
-    /^\s*\d+(\.\d+)?(\s*[-+*/]\s*\d+(\.\d+)?)*\s*$/;
-  return onlyNumberAndMathSymbols.test(expression);
+  return (
+    typeof expression === 'string' &&
+    containsOnlyNumbersAndOperators(expression)
+  );
 };
 
 /**
@@ -222,11 +239,12 @@ const evaluateComplexExpression = (
         parametersToEvaluate,
         input,
       });
+
       params.push(evaluatedOperand);
     }
   });
 
-  return params.length ? eval(params.join('')) : expression;
+  return params.length ? evaluateExpression(params.join('')) : expression;
 };
 
 /**
@@ -266,7 +284,14 @@ const evaluateOperand = (operandOptions: {
     );
   }
 
-  const isExpression = isValidArithmeticExpression(input[parameter]);
+  // Checks if the parameter in the input array has number value.
+  if (isNaN(Number(input[parameter]))) {
+    throw new InputValidationError(
+      `The value of the \`${parameter}\` parameter in the input array is not a number.`
+    );
+  }
+
+  const isExpression = isValidArithmeticExpression(expression);
 
   if (isExpression) {
     return evaluateArithmeticExpression(
@@ -284,4 +309,88 @@ const evaluateOperand = (operandOptions: {
   }
 
   return input[parameter];
+};
+
+/**
+ * Evaluates a simple arithmetic expression if the input is a valid expression.
+ * It checks if the input string follows a pattern for simple arithmetic
+ * operations (numbers with operators like *, /, +, -) between them.
+ */
+export const evaluateSimpleArithmeticExpression = (parameter: string) => {
+  const simpleExpressionRegex = /^\d+([*_/+])\d+$/;
+
+  return typeof parameter === 'string' &&
+    parameter.replace('=', '').match(simpleExpressionRegex)
+    ? evaluateExpression(parameter.replace('=', ''))
+    : parameter;
+};
+
+/**
+ * Validates whether a given value is a valid arithmetic expression.
+ *
+ * If the value is a string, it first removes any equal signs and checks if it
+ * is a valid arithmetic expression using the `isValidArithmeticExpression` helper.
+ * If valid, it attempts to evaluate the expression and ensures the result is numeric.
+ * In case of an invalid format, it calls `validateExpressionFormat`.
+ * The function returns true if the value is valid or numeric.
+ */
+export const validateArithmeticExpression = (
+  parameterName: string,
+  value: any,
+  type?: any
+) => {
+  if (typeof value === 'string') {
+    const sanitizedValue = value.replace('=', '');
+
+    if (isValidArithmeticExpression(sanitizedValue)) {
+      const evaluatedParam = evaluateExpression(sanitizedValue) || value;
+
+      if (!isNaN(Number(evaluatedParam))) {
+        return true;
+      }
+    }
+
+    validateExpressionFormat(parameterName, value);
+
+    if (type === 'number') {
+      const numberMatch = sanitizedValue.match(/[-+]?[0-9]*\.?[0-9]+/g);
+
+      return numberMatch ? parseFloat(numberMatch[0]) : value;
+    }
+  }
+
+  return value;
+};
+
+/**
+ * Helper function to evaluate the arithmetic expression.
+ */
+const evaluateExpression = (expression: string) => {
+  try {
+    return eval(expression);
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Validates whether the provided string value is a valid arithmetic expression based on its format.
+ *
+ * Checks if the expression contains an `=` sign and ensures that
+ * the part of the string following the equal sign is a valid arithmetic expression.
+ *
+ * - If the string starts with `=`, the remaining part should be a valid arithmetic expression.
+ * - If it doesn't start with `=`, the entire string should not resemble a valid arithmetic expression.
+ *
+ * Throws an `InputValidationError` error if the format or content of the arithmetic expression is invalid.
+ */
+const validateExpressionFormat = (parameterName: string, value: string) => {
+  const hasEqualSign = value.includes('=');
+  const isValid = isValidArithmeticExpression(value.replace('=', ''));
+
+  if ((hasEqualSign && !isValid) || (!hasEqualSign && isValid)) {
+    throw new InputValidationError(
+      `The \`${parameterName}\` contains an invalid arithmetic expression. It should start with \`=\` and include the symbols \`*\`, \`+\`, \`-\` and \`/\`.`
+    );
+  }
 };
