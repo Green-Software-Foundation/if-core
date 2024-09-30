@@ -74,6 +74,7 @@ export type TimeNormalizerConfig = {
   'end-time': Date | string;
   interval: number;
   'allow-padding': boolean;
+  'upsampling-resolution'?: number;
 };
 
 export type PaddingReceipt = {
@@ -82,10 +83,11 @@ export type PaddingReceipt = {
 };
 
 export type TimeParams = {
-  startTime: DateTime;
+  startTime: DateTime; // luxon
   endTime: DateTime;
   interval: number;
   allowPadding: boolean;
+  upsamplingResolution: number;
 };
 
 /** Common */
