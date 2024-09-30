@@ -35,8 +35,9 @@ export const PluginFactory =
   ) => ({
     metadata: {
       kind: 'execute',
-      inputs: {...params.metadata.inputs, ...parametersMetadata?.inputs},
-      outputs: parametersMetadata?.outputs || params.metadata.outputs,
+      // Handles empty metadata
+      inputs: {...params.metadata && params.metadata.inputs || {}, ...parametersMetadata?.inputs},
+      outputs: parametersMetadata?.outputs || params.metadata && params.metadata.outputs || {},
     },
     execute: async (inputs: PluginParams[]) => {
       const {
