@@ -63,6 +63,7 @@ export const evaluateArithmeticOutput = (
   const isValidExpression = isValidArithmeticExpression(outputParameter);
 
   if (
+    typeof outputParameter === 'string' &&
     outputParameter.includes('=') &&
     checkedOutputParameter &&
     isValidExpression
