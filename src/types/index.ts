@@ -127,7 +127,7 @@ export type ConfigValidatorFunction = (
 ) => ConfigParams;
 
 export interface PluginFactoryParams<C = ConfigParams> {
-  metadata: PluginParametersMetadata;
+  metadata?: PluginParametersMetadata;
   implementation: (
     inputs: PluginParams[],
     config: C,
