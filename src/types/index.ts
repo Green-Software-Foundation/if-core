@@ -34,13 +34,12 @@ export type RandIntGeneratorParams = {
 
 /** Interface */
 export type PluginParams = Record<string, any>;
-export type ExecutePlugin = {
+export type PluginInterface = {
   execute: (
     inputs: PluginParams[],
     config?: Record<string, any>
   ) => PluginParams[] | Promise<PluginParams[]>;
   metadata: {
-    kind: string;
     inputs?: ParameterMetadata;
     outputs?: ParameterMetadata;
   };
@@ -94,18 +93,6 @@ export type TimeParams = {
 export type ConfigParams = Record<string, any>;
 export type MappingParams = Record<string, string>;
 
-/** Group-by */
-export type GroupByPlugin = {
-  execute: (inputs: PluginParams[], config: GroupByConfig) => {children: any};
-  metadata: {
-    kind: string;
-  };
-  [key: string]: any;
-};
-
-export type GroupByConfig = {
-  group: string[];
-};
 
 export type ArithmeticParameters = {
   config: any;
