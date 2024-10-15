@@ -145,19 +145,20 @@ export const PluginFactory =
       // Check if arithmetic expressions are enabled, get output parameter
       if (isArithmeticEnable) {
         outputParam = Object.keys(outputs[0]).filter(
-          ouptut => !Object.keys(inputs[0]).includes(ouptut)
+          output => !Object.keys(inputs[0]).includes(output)
         )[0];
       }
 
       return outputs.map((output, index) => {
-        // Check if arithmetic expressions are enabled, evaluate output parameter
-        const resultOutput = isArithmeticEnable
+        // Check if arithmetic expressions are enabled and outputParam exists, evaluate output parameter
+        const resultOutput = isArithmeticEnable && outputParam
           ? evaluateArithmeticOutput(outputParam, output[outputParam])
           : output;
 
         // Merge input if it exists, otherwise just use the output
         const correspondingInput =
           removeMappedInputParameter(inputs[index], mapping) || {};
+
 
         return {
           ...correspondingInput,
