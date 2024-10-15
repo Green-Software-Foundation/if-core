@@ -159,7 +159,6 @@ export const PluginFactory =
         const correspondingInput =
           removeMappedInputParameter(inputs[index], mapping) || {};
 
-        console.log('corresponding', correspondingInput)
 
         return {
           ...correspondingInput,
