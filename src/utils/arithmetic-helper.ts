@@ -56,11 +56,12 @@ export const getParameterFromArithmeticExpression = (
  */
 export const evaluateArithmeticOutput = (
   outputParameter: string,
-  calculatedResult: number
+  output: PluginParams
 ) => {
   const checkedOutputParameter =
     getParameterFromArithmeticExpression(outputParameter);
   const isValidExpression = isValidArithmeticExpression(outputParameter);
+  const calculatedResult = output[outputParameter]
 
   if (
     typeof outputParameter === 'string' &&
@@ -74,15 +75,22 @@ export const evaluateArithmeticOutput = (
       .replace(/['"]/g, '');
 
     const result = evaluateExpression(transformedOutputParameter);
+    delete output[outputParameter]
 
-    return {[checkedOutputParameter]: result};
+    return {
+      ...output,
+      [checkedOutputParameter]: result
+    };
   } else if (outputParameter !== checkedOutputParameter) {
     throw new WrongArithmeticExpressionError(
       `The output parameter \`${outputParameter}\` contains an invalid arithmetic expression. It should start with \`=\` and include the symbols \`*\`, \`+\`, \`-\` and \`/\`.`
     );
   }
 
-  return {[outputParameter]: calculatedResult};
+  return {
+    ...output,
+    [outputParameter]: calculatedResult
+  };
 };
 
 /**
