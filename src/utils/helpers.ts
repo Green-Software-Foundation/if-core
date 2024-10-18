@@ -89,7 +89,9 @@ export const mapOutputIfNeeded = (
   output: PluginParams,
   mapping: MappingParams
 ) => {
-  if (!mapping) return output;
+  if (!mapping) {
+    return output
+  };
 
   return Object.entries(output).reduce((acc, [key, value]) => {
     if (key in mapping) {
