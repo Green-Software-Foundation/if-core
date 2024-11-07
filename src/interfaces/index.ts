@@ -35,8 +35,14 @@ export const PluginFactory =
   ) => ({
     metadata: {
       // Handles empty metadata
-      inputs: {...params.metadata && params.metadata.inputs || {}, ...parametersMetadata?.inputs},
-      outputs: parametersMetadata?.outputs || params.metadata && params.metadata.outputs || {},
+      inputs: {
+        ...((params.metadata && params.metadata.inputs) || {}),
+        ...parametersMetadata?.inputs,
+      },
+      outputs:
+        parametersMetadata?.outputs ||
+        (params.metadata && params.metadata.outputs) ||
+        {},
     },
     execute: async (inputs: PluginParams[]) => {
       const {
@@ -61,7 +67,7 @@ export const PluginFactory =
           const evaluatedInput = evaluateInput(input);
 
           // If the config is not provided, skip evaluating parameters functionality.
-          if (Object.keys(config || {}).length) {
+          if (Object.keys(config!).length) {
             evaluatedConfig = evaluateConfig({
               config: mappedConfig,
               input: evaluatedInput,
@@ -83,12 +89,12 @@ export const PluginFactory =
             )
         : config;
 
-      // In case of the config is not provided, but the plugin has default a config,
+      // In case of the config is not provided, but the plugin has a default config,
       // evaluates config parameters
       if (
         isArithmeticEnable &&
-        !Object.keys(config || {}).length &&
-        Object.keys(safeConfig || {}).length
+        !Object.keys(config!).length &&
+        Object.keys(safeConfig!).length
       ) {
         inputs.forEach(input => {
           evaluatedConfig = evaluateConfig({
@@ -151,9 +157,10 @@ export const PluginFactory =
 
       return outputs.map((output, index) => {
         // Check if arithmetic expressions are enabled and outputParam exists, evaluate output parameter
-        const resultOutput = isArithmeticEnable && outputParam
-          ? evaluateArithmeticOutput(outputParam, output)
-          : output;
+        const resultOutput =
+          isArithmeticEnable && outputParam
+            ? evaluateArithmeticOutput(outputParam, output)
+            : output;
 
         // Merge input if it exists, otherwise just use the output
         const correspondingInput =
