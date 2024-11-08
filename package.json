@@ -53,12 +53,13 @@
   "scripts": {
     "build": "npm run clean && tsc --project tsconfig.build.json",
     "clean": "rimraf utils/ types/ interfaces/ consts/ index.d.ts index.js",
+    "coverage": "jest --verbose --coverage --testPathPattern=src/__tests__/",
     "fix": "gts fix",
     "fix:package": "fixpack",
     "lint": "gts lint",
     "prepare": "husky install",
     "prepublish": "npm run build",
-    "test": "jest --verbose"
+    "test": "jest --verbose --testPathPattern=src/__tests__/"
   },
   "types": "./types.d.ts"
 }
