@@ -52,7 +52,6 @@ export const PluginFactory =
         allowArithmeticExpressions,
       } = params;
       let evaluatedConfig;
-      let outputParam: string;
       const expressionCleanedConfig: ConfigParams = {};
       const isArithmeticEnable = !!allowArithmeticExpressions;
       const mappedConfig: ConfigParams = mapConfigIfNeeded(config, mapping);
@@ -147,6 +146,8 @@ export const PluginFactory =
         ...(evaluatedConfig || {}),
         mapping,
       });
+
+      let outputParam: string;
 
       // Check if arithmetic expressions are enabled, get output parameter
       if (isArithmeticEnable) {
