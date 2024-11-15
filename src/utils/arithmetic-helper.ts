@@ -178,7 +178,6 @@ const evaluateArithmeticExpression = (
   const strippedEqualExpression = expression.replace('=', '')
 
   if (isBasicArithmetic(strippedEqualExpression)) {
-    console.log(1111)
     return evaluateExpression(strippedEqualExpression);
   }
 
@@ -373,9 +372,7 @@ export const validateArithmeticExpression = (
  */
 const evaluateExpression = (expression: string) => {
   try {
-    const result = eval(expression)
-    console.log('eval', result)
-    return result;
+    return eval(expression)
   } catch {
     return undefined;
   }
