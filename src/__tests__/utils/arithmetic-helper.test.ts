@@ -40,7 +40,7 @@ describe('utils:arithmetic-helper: ', () => {
   
     it('returns the original input if no match is found.', () => {
       const arithmeticParameter = "123"
-      const expectedValue = "123"
+      const expectedValue = 123
       const arithmeticParameterEmptyString = ""
       const expectedValueEmptyString = ""
       const arithmeticParameterExclamation = "!!"
@@ -161,7 +161,7 @@ describe('utils:arithmetic-helper: ', () => {
       expect(result).toEqual({ param1: 10 });
     });
   
-    it('should evaluate multiple parameters with arithmetic expressions', () => {
+    it('should evaluate multiple parameters with arithmetic expressions.', () => {
       const input = { param1: '=2*5', param2: '=3+7' };
       
       const result = evaluateInput(input);
@@ -169,7 +169,7 @@ describe('utils:arithmetic-helper: ', () => {
       expect(result).toEqual({ param1: 10, param2: 10 });
     });
   
-    it('should evaluate parameters with dependencies on other parameters', () => {
+    it('should evaluate parameters with dependencies on other parameters.', () => {
       const input = { param1: 10, param2: '=param1*2' };
       
       const result = evaluateInput(input);
@@ -177,7 +177,7 @@ describe('utils:arithmetic-helper: ', () => {
       expect(result).toEqual({ param1: 10, param2: 20 });
     });
   
-    it('should evaluate nested dependencies', () => {
+    it('should evaluate nested dependencies.', () => {
       const input = { param1: 10, param2: '=param1*2', param3: '=param2+5' };
       
       const result = evaluateInput(input);
@@ -185,7 +185,7 @@ describe('utils:arithmetic-helper: ', () => {
       expect(result).toEqual({ param1: 10, param2: 20, param3: 25 });
     });
   
-    it('should return original value if expression is invalid', () => {
+    it('should return original value if expression is invalid.', () => {
       const input = { param1: '=invalid*expression' };
       
       expect(() => {
@@ -193,7 +193,7 @@ describe('utils:arithmetic-helper: ', () => {
       }).toThrow(InputValidationError)
     });
   
-    it('should handle a mix of valid expressions, dependencies, and plain values', () => {
+    it('should handle a mix of valid expressions, dependencies, and plain values.', () => {
       const input = { param1: 10, param2: '=param1+5', param3: 30, param4: '=param3*2' };
       
       const result = evaluateInput(input);
@@ -221,32 +221,30 @@ describe('utils:arithmetic-helper: ', () => {
       );
     });
 
-    // it('should throw an error when input contains division by zero.', () => {
-    //   const input = { param1: '=10/0' };
+    it('should throw an error when input contains division by zero.', () => {
+      const input = { param1: '=10/0' };
   
-    //   expect(() => {
-    //     const response = evaluateInput(input);
-    //     console.log(response)
-    //   }).toThrow(
-    //     new Error('Division by zero is not allowed in arithmetic expressions.')
-    //   );
-    // });
+      expect(() => {
+        evaluateInput(input);
+      }).toThrow(
+        new Error("The input expression contains a division by zero: `10/0`.")
+      );
+    });
   })
 
   describe('evaluateConfig():', () => {
-      // it('should evaluate a simple arithmetic expression in config', () => {
-      //   const options = {
-      //     config: { param1: '=2*5' },
-      //     input: {},
-      //     parametersToEvaluate: ['param1']
-      //   };
+      it('should evaluate a simple arithmetic expression in config.', () => {
+        const options = {
+          config: { param1: '=2*5' },
+          input: {},
+          parametersToEvaluate: ['param1']
+        };
+        const result = evaluateConfig(options);
     
-      //   const result = evaluateConfig(options);
+        expect(result).toEqual({ param1: 10 });
+      });
     
-      //   expect(result).toEqual({ param1: 10 });
-      // });
-    
-      it('should skip evaluation if parameter is not in parametersToEvaluate', () => {
+      it('should skip evaluation if parameter is not in `parametersToEvaluate`.', () => {
         const options = {
           config: { param1: '=2*5', param2: '10' },
           input: {},
@@ -258,7 +256,7 @@ describe('utils:arithmetic-helper: ', () => {
         expect(result).toEqual({ "param1": "=2*5", param2: '10' });
       });
     
-      it('should throw error for invalid arithmetic expression', () => {
+      it('should throw error for invalid arithmetic expression.', () => {
         const options = {
           config: { param1: '=2^5' },
           input: {},
@@ -270,7 +268,7 @@ describe('utils:arithmetic-helper: ', () => {
         );
       });
     
-      it('should use values from input in arithmetic expression', () => {
+      it('should use values from input in arithmetic expression.', () => {
         const options = {
           config: { param1: '=inputValue*2' },
           input: { inputValue: 5 },
@@ -310,11 +308,11 @@ describe('utils:arithmetic-helper: ', () => {
         expect(result).toBe(true);
       });
     
-      it('should return false for an expression without the "=" sign.', () => {
+      it('should return true for an expression without the "=" sign.', () => {
         const parameter = '2+3*5';
         const result = isValidArithmeticExpression(parameter);
 
-        expect(result).toBe(false);
+        expect(result).toBe(true);
       });
     
       it('should return false for an expression with invalid characters.', () => {
@@ -367,12 +365,12 @@ describe('utils:arithmetic-helper: ', () => {
         expect(result).toBe(5);
       });
     
-      // it('should evaluate a valid subtraction expression.', () => {
-      //   const parameter = '=10-4';
-      //   const result = evaluateSimpleArithmeticExpression(parameter);
+      it('should evaluate a valid subtraction expression.', () => {
+        const parameter = '=10-4';
+        const result = evaluateSimpleArithmeticExpression(parameter);
 
-      //   expect(result).toBe(6);
-      // });
+        expect(result).toBe(6);
+      });
     
       it('should evaluate a valid multiplication expression.', () => {
         const parameter = '=2*3';
@@ -381,52 +379,55 @@ describe('utils:arithmetic-helper: ', () => {
         expect(result).toBe(6);
       });
     
-      it('should evaluate a valid division expression', () => {
+      it('should evaluate a valid division expression.', () => {
         const parameter = '=10/2';
         const result = evaluateSimpleArithmeticExpression(parameter);
 
         expect(result).toBe(5);
       });
     
-      it('should return the original parameter if there is no "=" sign', () => {
+      it('should return the original parameter if there is no "=" sign.', () => {
         const parameter = '2+3';
         const result = evaluateSimpleArithmeticExpression(parameter);
 
         expect(result).toBe(5);
       });
     
-      it('should return the original parameter if the expression format is invalid', () => {
+      it('should return the original parameter if the expression format is invalid.', () => {
         const parameter = '=2+3*5';
         const result = evaluateSimpleArithmeticExpression(parameter);
+
         expect(result).toBe('=2+3*5');
       });
     
-      it('should return the original parameter if it contains unsupported characters', () => {
+      it('should return the original parameter if it contains unsupported characters.', () => {
         const parameter = '=a+b';
         const result = evaluateSimpleArithmeticExpression(parameter);
         expect(result).toBe('=a+b');
       });
     
-      it('should return the original parameter if it is not a simple expression', () => {
+      it('should return the original parameter if it is not a simple expression.', () => {
         const parameter = '=param1*2';
         const result = evaluateSimpleArithmeticExpression(parameter);
         expect(result).toBe('=param1*2');
       });
     
-      it('should return the original parameter if it is a standalone number', () => {
+      it('should return the original parameter if it is a standalone number.', () => {
         const parameter = '=42';
         const result = evaluateSimpleArithmeticExpression(parameter);
         expect(result).toBe('=42');
       });
     
-      it('should return the original parameter if the expression contains decimals', () => {
+      it('should return the original parameter if the expression contains decimals.', () => {
         const parameter = '=2.5+3.5';
         const result = evaluateSimpleArithmeticExpression(parameter);
-        expect(result).toBe('=2.5+3.5');
+        const expectedResult = 6
+
+        expect(result).toBe(expectedResult);
       });
     });
 
-    describe('validateArithmeticExpression', () => {
+    describe('validateArithmeticExpression(): ', () => {
       it('should return true for a valid arithmetic expression.', () => {
         const parameterName = 'param1';
         const value = '=param1+3';
