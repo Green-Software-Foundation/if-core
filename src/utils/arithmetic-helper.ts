@@ -331,7 +331,7 @@ const evaluateOperand = (operandOptions: {
  * operations (numbers with operators like *, /, +, -) between them.
  */
 export const evaluateSimpleArithmeticExpression = (parameter: string) => {
-  const simpleExpressionRegex = /^\d+([*-/+])\d+$/;
+  const simpleExpressionRegex = /^\d+(\.\d+)?([+\-*/])\d+(\.\d+)?$/;
 
   return typeof parameter === 'string' &&
     parameter.replace('=', '').match(simpleExpressionRegex)
