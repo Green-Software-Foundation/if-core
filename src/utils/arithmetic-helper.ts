@@ -35,11 +35,23 @@ export const getParameterFromArithmeticExpression = (
   arithmeticParameter: string
 ) => {
   const regex = /["']?([a-zA-Z]+(?:[-/][a-zA-Z]+)*)["']?/;
-  const match = regex.exec(arithmeticParameter);
+  const regexForNumbers = /^=?[0-9+\-*/\s]+$/;
 
-  if (
-    typeof arithmeticParameter === 'string' && match !== null
-  ) {
+  const match =
+    regex.exec(arithmeticParameter) ||
+    regexForNumbers.exec(arithmeticParameter);
+
+  if (regexForNumbers.exec(arithmeticParameter)) {
+    const evaluatedValue = eval(
+      arithmeticParameter.toString().replace('=', '')
+    );
+
+    if (!isNaN(evaluatedValue) && isFinite(evaluatedValue)) {
+      return evaluatedValue;
+    }
+  }
+
+  if (typeof arithmeticParameter === 'string' && match !== null) {
     return match[1];
   }
 
@@ -58,9 +70,9 @@ export const evaluateArithmeticOutput = (
   output: PluginParams
 ) => {
   const checkedOutputParameter =
-    getParameterFromArithmeticExpression(outputParameter); 
+    getParameterFromArithmeticExpression(outputParameter);
   const isValidExpression = isValidArithmeticExpression(outputParameter);
-  const valueFromOutput = output[outputParameter]
+  const valueFromOutput = output[outputParameter];
 
   if (
     typeof outputParameter === 'string' &&
@@ -74,11 +86,11 @@ export const evaluateArithmeticOutput = (
       .replace(/['"]/g, '');
 
     const result = evaluateExpression(transformedOutputParameter);
-    delete output[outputParameter]
+    delete output[outputParameter];
 
     return {
       ...output,
-      [checkedOutputParameter]: result
+      [checkedOutputParameter]: result,
     };
   } else if (outputParameter !== checkedOutputParameter) {
     throw new WrongArithmeticExpressionError(
@@ -86,7 +98,7 @@ export const evaluateArithmeticOutput = (
     );
   }
 
-  return output
+  return output;
 };
 
 /**
@@ -168,14 +180,14 @@ const evaluateArithmeticExpression = (
   input: PluginParams
 ) => {
   if (parameter === 'timestamp') {
-    return input[parameter]
-  };
+    return input[parameter];
+  }
 
   if (isNotArithmeticExpression(expression)) {
-    return expression
-  };
+    return expression;
+  }
 
-  const strippedEqualExpression = expression.replace('=', '')
+  const strippedEqualExpression = expression.replace('=', '');
 
   if (isBasicArithmetic(strippedEqualExpression)) {
     return evaluateExpression(strippedEqualExpression);
@@ -192,10 +204,9 @@ const evaluateArithmeticExpression = (
 /**
  * Checks if the given expression is not an arithmetic expression.
  */
-const isNotArithmeticExpression = (expression: string) => (
-    typeof expression !== 'string' ||
-    (!expression.includes('=') && !containsOnlyNumbersAndOperators(expression))
-  );
+const isNotArithmeticExpression = (expression: string) =>
+  typeof expression !== 'string' ||
+  (!expression.includes('=') && !containsOnlyNumbersAndOperators(expression));
 
 /**
  * Utility function to check if a string contains only numbers and basic math operators.
@@ -210,10 +221,8 @@ const containsOnlyNumbersAndOperators = (expression: string): boolean => {
 /**
  * Checks if the provided expression is a basic arithmetic expression.
  */
-const isBasicArithmetic = (expression: string): boolean => (
-    typeof expression === 'string' &&
-    containsOnlyNumbersAndOperators(expression)
-  );
+const isBasicArithmetic = (expression: string): boolean =>
+  typeof expression === 'string' && containsOnlyNumbersAndOperators(expression);
 
 /**
  * Evaluates a complex arithmetic expression by parsing it into operands,
@@ -351,7 +360,7 @@ export const validateArithmeticExpression = (
       const evaluatedParam = evaluateExpression(sanitizedValue) || value;
 
       if (!isNaN(Number(evaluatedParam))) {
-        return true;
+        return evaluatedParam;
       }
     }
 
@@ -372,8 +381,22 @@ export const validateArithmeticExpression = (
  */
 const evaluateExpression = (expression: string) => {
   try {
-    return eval(expression)
-  } catch {
+    const evaluatedValue = eval(expression);
+    if (evaluatedValue === Infinity) {
+      throw new ZeroDivisionArithmeticOperationError(
+        `The input expression contains a division by zero: \`${expression}\`.`
+      );
+    }
+    if (isNaN(evaluatedValue)) {
+      return undefined;
+    }
+
+    return evaluatedValue;
+  } catch (error) {
+    if (error instanceof ZeroDivisionArithmeticOperationError) {
+      throw error;
+    }
+
     return undefined;
   }
 };
