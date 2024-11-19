@@ -258,7 +258,7 @@ const evaluateComplexExpression = (
     }
   });
 
-  return params.length ? evaluateExpression(params.join('')) : expression;
+  return evaluateExpression(params.join(''));
 };
 
 /**
@@ -289,8 +289,7 @@ const evaluateOperand = (operandOptions: {
   parametersToEvaluate: string[];
   input: PluginParams;
 }) => {
-  const {parameter, expression, parameterValue, parametersToEvaluate, input} =
-    operandOptions;
+  const {parameter, expression, parametersToEvaluate, input} = operandOptions;
 
   if (!(parameter in input)) {
     throw new InputValidationError(
@@ -311,14 +310,8 @@ const evaluateOperand = (operandOptions: {
     return evaluateArithmeticExpression(
       input[parameter],
       parameter,
-      [...(parametersToEvaluate || []), parameter],
+      [...parametersToEvaluate, parameter],
       input
-    );
-  }
-
-  if (input[parameter] === 0 && expression.includes('/')) {
-    throw new ZeroDivisionArithmeticOperationError(
-      `Division by zero in \`${parameterValue}: ${expression}\` using input parameter \`${parameter}\`.`
     );
   }
 
@@ -331,7 +324,7 @@ const evaluateOperand = (operandOptions: {
  * operations (numbers with operators like *, /, +, -) between them.
  */
 export const evaluateSimpleArithmeticExpression = (parameter: string) => {
-  const simpleExpressionRegex = /^\d+(\.\d+)?([+\-*/])\d+(\.\d+)?$/;
+  const simpleExpressionRegex = /^\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$/;
 
   return typeof parameter === 'string' &&
     parameter.replace('=', '').match(simpleExpressionRegex)
