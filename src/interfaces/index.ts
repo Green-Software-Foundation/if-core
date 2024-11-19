@@ -164,8 +164,10 @@ export const PluginFactory =
             : output;
 
         // Merge input if it exists, otherwise just use the output
-        const correspondingInput =
-          removeMappedInputParameter(inputs[index], mapping) || {};
+        const correspondingInput = removeMappedInputParameter(
+          inputs[index],
+          mapping
+        );
 
         return {
           ...correspondingInput,
