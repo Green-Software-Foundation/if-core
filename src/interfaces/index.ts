@@ -52,7 +52,6 @@ export const PluginFactory =
         allowArithmeticExpressions,
       } = params;
       let evaluatedConfig;
-      let outputParam: string;
       const expressionCleanedConfig: ConfigParams = {};
       const isArithmeticEnable = !!allowArithmeticExpressions;
       const mappedConfig: ConfigParams = mapConfigIfNeeded(config, mapping);
@@ -148,6 +147,8 @@ export const PluginFactory =
         mapping,
       });
 
+      let outputParam: string;
+
       // Check if arithmetic expressions are enabled, get output parameter
       if (isArithmeticEnable) {
         outputParam = Object.keys(outputs[0]).filter(
@@ -163,8 +164,10 @@ export const PluginFactory =
             : output;
 
         // Merge input if it exists, otherwise just use the output
-        const correspondingInput =
-          removeMappedInputParameter(inputs[index], mapping) || {};
+        const correspondingInput = removeMappedInputParameter(
+          inputs[index],
+          mapping
+        );
 
         return {
           ...correspondingInput,

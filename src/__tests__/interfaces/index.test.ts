@@ -58,6 +58,33 @@ describe('interfaces', () => {
       expect(result).toBeInstanceOf(Array);
     });
 
+    it('validates config using when parametersMetadata is undefined.', async () => {
+      const mockImplementation = jest.fn(
+        async (inputs: PluginParams[]) => inputs
+      );
+      const mockConfigValidation = jest.fn(config => {
+        if (!config || !Object.keys(config)?.length) {
+          throw new ConfigError('Config is not provided.');
+        }
+
+        return config;
+      });
+      const params = {
+        implementation: mockImplementation,
+        configValidation: mockConfigValidation,
+      };
+
+      const plugin = PluginFactory(params);
+      const config = {coefficient: 2};
+      const fakeParametersMetadata = undefined;
+      const pluginInstance = plugin(config, fakeParametersMetadata!, {});
+      const result = await pluginInstance.execute(mockInputs);
+
+      expect.assertions(2);
+      expect(mockImplementation).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Array);
+    });
+
     it('validates config using configValidation as Zod schema.', async () => {
       const mockImplementation = jest.fn(
         async (inputs: PluginParams[]) => inputs
