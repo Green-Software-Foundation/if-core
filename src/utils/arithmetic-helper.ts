@@ -34,7 +34,7 @@ const parseArithmeticParameter = (arithmeticParameter: string) => {
 export const getParameterFromArithmeticExpression = (
   arithmeticParameter: string
 ) => {
-  const regex = /["']?([a-zA-Z]+(?:[-/][a-zA-Z]+)*)["']?/;
+  const regex = /["']?([a-zA-Z]+(?:[-_/][a-zA-Z]+)*)["']?/;
   const regexForNumbers = /^=?[0-9+\-*/\s]+$/;
 
   const match =

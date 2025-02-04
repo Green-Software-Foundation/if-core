@@ -36,11 +36,13 @@ describe('utils:arithmetic-helper: ', () => {
       );
     });
 
-    it('extracts a parameter with hyphen or slash.', () => {
+    it('extracts a parameter with hyphen or slash or underscore.', () => {
       const arithmeticParameter = 'param-name';
       const arithmeticParameterWithSlash = 'param/name';
+      const arithmeticParameterWithUnderscore = 'param_name';
       const expectedValue = 'param-name';
       const expectedValueWithSlash = 'param/name';
+      const expectedValueWithUnderscore = 'param_name';
 
       expect(getParameterFromArithmeticExpression(arithmeticParameter)).toBe(
         expectedValue
@@ -48,6 +50,9 @@ describe('utils:arithmetic-helper: ', () => {
       expect(
         getParameterFromArithmeticExpression(arithmeticParameterWithSlash)
       ).toBe(expectedValueWithSlash);
+      expect(
+        getParameterFromArithmeticExpression(arithmeticParameterWithUnderscore)
+      ).toBe(expectedValueWithUnderscore);
     });
 
     it('returns the original input if no match is found.', () => {
@@ -539,7 +544,7 @@ describe('utils:arithmetic-helper: ', () => {
 
     it('returns the parsed number if type is "number" and value is a simple number string without expression.', () => {
       const parameterName = 'param5';
-      const value = '42';
+      const value = '42_000';
       const type = 'number';
 
       const result = validateArithmeticExpression(parameterName, value, type);
