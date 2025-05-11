@@ -1,7 +1,7 @@
-/**/*.js
-/**/*.d.ts
-lib/**/*.js
-lib/**/*.d.ts
+index.js
+index.d.ts
+*/*.js
+*/*.d.ts
 node_modules
 .idea
 *.tsbuildinfo
